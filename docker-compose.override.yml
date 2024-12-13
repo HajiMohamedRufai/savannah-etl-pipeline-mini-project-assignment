@@ -1,0 +1,19 @@
+version: '3'
+services:
+  webserver:
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/usr/local/airflow/savannah-etl-9469c497fcb1.json
+    volumes:
+      - /Users/hajirufai/DE-projects/savannah-etl/savannah-etl-9469c497fcb1.json:/usr/local/airflow/savannah-etl-9469c497fcb1.json
+
+  scheduler:
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/usr/local/airflow/savannah-etl-9469c497fcb1.json
+    volumes:
+      - /Users/hajirufai/DE-projects/savannah-etl/savannah-etl-9469c497fcb1.json:/usr/local/airflow/savannah-etl-9469c497fcb1.json
+
+  triggerer:
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/usr/local/airflow/savannah-etl-9469c497fcb1.json
+    volumes:
+      - /Users/hajirufai/DE-projects/savannah-etl/savannah-etl-9469c497fcb1.json:/usr/local/airflow/savannah-etl-9469c497fcb1.json
