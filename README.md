@@ -1,21 +1,29 @@
-Overview
-========
+# savannah-etl-pipeline-mini-project-assignment
 
-Welcome to Astronomer! This project was generated after you ran 'astro dev init' using the Astronomer CLI. This readme describes the contents of the project, as well as how to run Apache Airflow on your local machine.
+Pipeline Design
+===============
 
-Project Contents
+The ETL pipeline is orchestrated using Apache Airflow deployed on Astronomer and integrated with Google Cloud Platform (GCP) services. The DAG is structured with the following tasks:
+
+- **Extract Data**: Ingest data from Google Cloud Storage (GCS).
+- **Transform Data**: Process and transform data using Python.
+- **Load Data**: Load the transformed data into BigQuery.
+
+The task dependencies ensure that the data flows sequentially from extraction to transformation and finally loading into BigQuery.
+
+Codebase Overview
+=================
+
+The codebase comprises the following scripts and modules:
+
+- **dags/savannah_etl_dag.py**: Defines the Airflow DAG and sets up task dependencies.
+- **include/transform_functions.py**: Contains Python functions for data transformation.
+- **plugins/**: Holds any custom Airflow plugins utilized in the project.
+
+BigQuery Queries
 ================
 
-Your Astro project contains the following files and folders:
-
-- dags: This folder contains the Python files for your Airflow DAGs. By default, this directory includes one example DAG:
-    - `example_astronauts`: This DAG shows a simple ETL pipeline example that queries the list of astronauts currently in space from the Open Notify API and prints a statement for each astronaut. The DAG uses the TaskFlow API to define tasks in Python, and dynamic task mapping to dynamically print a statement for each astronaut. For more on how this DAG works, see our [Getting started tutorial](https://www.astronomer.io/docs/learn/get-started-with-airflow).
-- Dockerfile: This file contains a versioned Astro Runtime Docker image that provides a differentiated Airflow experience. If you want to execute other commands or overrides at runtime, specify them here.
-- include: This folder contains any additional files that you want to include as part of your project. It is empty by default.
-- packages.txt: Install OS-level packages needed for your project by adding them to this file. It is empty by default.
-- requirements.txt: Install Python packages needed for your project by adding them to this file. It is empty by default.
-- plugins: Add custom or community plugins for your project to this file. It is empty by default.
-- airflow_settings.yaml: Use this local-only file to specify Airflow Connections, Variables, and Pools instead of entering them in the Airflow UI as you develop DAGs in this project.
+The SQL logic employed in BigQuery involves data insertion and aggregation:
 
 Deploy Your Project Locally
 ===========================
