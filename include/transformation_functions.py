@@ -1,14 +1,34 @@
 import pandas as pd
-from google.cloud import storage
 import json
+from google.cloud import storage
 
+def transform_data(bucket_name, source_file, destination_file, transform_func):
+    """
+    Read JSON from GCS, transform it using the provided function, and save it as CSV back to GCS.
+    """
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    
+    # Read JSON from GCS
+    blob = bucket.blob(source_file)
+    data = json.loads(blob.download_as_text())
+    
+    # Transform data into DataFrame
+    df = transform_func(data)
+    
+    # Save DataFrame to CSV locally
+    local_csv_path = f'/tmp/{destination_file}'
+    df.to_csv(local_csv_path, index=False)
+    print(f"Transformed data saved to {local_csv_path}")
+    
+    # Upload CSV to GCS
+    blob = bucket.blob(destination_file)
+    blob.upload_from_filename(local_csv_path)
+    print(f"Uploaded {destination_file} to GCS bucket {bucket_name}")
 
-
-# Transformation for Users
 def transform_users(data):
-    users_data = []
-    for user in data.get("users", []):
-        users_data.append({
+    users_data = [
+        {
             "user_id": user.get("id"),
             "first_name": user.get("firstName"),
             "last_name": user.get("lastName"),
@@ -17,10 +37,11 @@ def transform_users(data):
             "street": user.get("address", {}).get("address"),
             "city": user.get("address", {}).get("city"),
             "postal_code": user.get("address", {}).get("postalCode"),
-        })
+        }
+        for user in data.get("users", [])
+    ]
     return pd.DataFrame(users_data)
 
-# Transformation for Products
 def transform_products(data):
     filtered_products = [
         {
@@ -31,11 +52,10 @@ def transform_products(data):
             "price": product.get("price"),
         }
         for product in data.get("products", [])
-        if product.get("price", 0) > 50  # Filter out products with price <= 50
+        if product.get("price", 0) > 50
     ]
     return pd.DataFrame(filtered_products)
 
-# Transformation for Carts
 def transform_carts(data):
     flattened_data = []
     for cart in data.get("carts", []):
