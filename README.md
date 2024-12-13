@@ -3,13 +3,16 @@
 Pipeline Design
 ===============
 
-The ETL pipeline is orchestrated using Apache Airflow deployed on Astronomer and integrated with Google Cloud Platform (GCP) services. The DAG is structured with the following tasks:
+The ETL pipeline is orchestrated using Apache Airflow deployed on Astronomer and integrated with Google Cloud Platform (GCP) services. The DAG is structured with mainly the following tasks:
 
-- **Extract Data**: Ingest data from Google Cloud Storage (GCS).
-- **Transform Data**: Process and transform data using Python.
-- **Load Data**: Load the transformed data into BigQuery.
+- **Extract Data**: Ingest data from the provided APIs and store them as JSON in Cloud Storage (GCS).
+- **Transform Data**: Process and transform the json data using Python and load the intermediate results as CSVs file in GCS.
+- **Load Data**: Load the transformed data CSVs into BigQuery as tables.
 
 The task dependencies ensure that the data flows sequentially from extraction to transformation and finally loading into BigQuery.
+
+The final pipeline can be seen as follows which ran sucesfully:
+![airflow data pipeline image](<savannah-etl-pipeline-airflow.png>)
 
 Codebase Overview
 =================
@@ -17,40 +20,50 @@ Codebase Overview
 The codebase comprises the following scripts and modules:
 
 - **dags/savannah_etl_dag.py**: Defines the Airflow DAG and sets up task dependencies.
-- **include/transform_functions.py**: Contains Python functions for data transformation.
-- **plugins/**: Holds any custom Airflow plugins utilized in the project.
+- **include/*.py**: Contains Python functions (scripts) which assist in the savannah_etl_dag.py to reduce the number of lines in a file.
+
 
 BigQuery Queries
 ================
 
-The SQL logic employed in BigQuery involves data insertion and aggregation:
+The SQL logic employed in BigQuery involves data insertion and aggregation.
 
-Deploy Your Project Locally
+They were used to answer the questions as provided in the assignment at [./Savannah Informatics Data Engineering Assessement.pdf].
+
+The queries used are found in include/helper_functions.py
+
+The resultant when run in BigQuery is as follows creation of 3 more tables.
+
+![big query tables](<Big Query generated tables.png>) of detailed:
+- category_summary
+- user_summary
+- card_details
+
+HOW TO RUN THE PROJECT
 ===========================
+1. You can use Google virtual machine or your local machine.
 
-1. Start Airflow on your local machine by running 'astro dev start'.
+2. Ensure you have docker installed in your machine. Verify it by: 
+```docker-compose --version```
 
-This command will spin up 4 Docker containers on your machine, each for a different Airflow component:
+3. Install astronomer to run airflow. verify astronomer installation by
+```astro version```
 
-- Postgres: Airflow's Metadata Database
-- Webserver: The Airflow component responsible for rendering the Airflow UI
-- Scheduler: The Airflow component responsible for monitoring and triggering tasks
-- Triggerer: The Airflow component responsible for triggering deferred tasks
+4. Create a new google project in your console and enable these APIs which will be used:
+- Google Cloud Storage
+- BigQuery
+- Cloud Storage JSON API
 
-2. Verify that all 4 Docker containers were created by running 'docker ps'.
+5. Create a bucket which will be used as the data lake to store the files in the project
 
-Note: Running 'astro dev start' will start your project with the Airflow Webserver exposed at port 8080 and Postgres exposed at port 5432. If you already have either of those ports allocated, you can either [stop your existing Docker containers or change the port](https://www.astronomer.io/docs/astro/cli/troubleshoot-locally#ports-are-not-available-for-my-local-airflow-webserver).
+6. Create a service account with the permission which will be used. Roles used:
+- Storage Admin
+- BigQuery Admin 
 
-3. Access the Airflow UI for your local Airflow project. To do so, go to http://localhost:8080/ and log in with 'admin' for both your Username and Password.
+7. Download the json key file from above
 
-You should also be able to access your Postgres Database at 'localhost:5432/postgres'.
+8. Initialize an astronomer project
+9. Create a docker-compose.override file to mount the json file into the containers
+10. Create your DAG!
 
-Deploy Your Project to Astronomer
-=================================
-
-If you have an Astronomer account, pushing code to a Deployment on Astronomer is simple. For deploying instructions, refer to Astronomer documentation: https://www.astronomer.io/docs/astro/deploy-code/
-
-Contact
-=======
-
-The Astronomer CLI is maintained with love by the Astronomer team. To report a bug or suggest a change, reach out to our support.
+Copyright Haji Rufai 2024
